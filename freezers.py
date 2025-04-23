@@ -5,8 +5,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 # Configurações do InfluxDB
 INFLUXDB_URL = "http://localhost:8086"  # Substitua pelo seu URL do InfluxDB
-INFLUXDB_TOKEN = "0GDOWgE5cMS-99Sr8HcqNs3kiUraAKRaWiaPUG_AuKEEm9xWBlOd4D62Zrr3ic5mfpQvN4BbVTqty9UmVdY2pA=="  # Substitua pelo seu token do InfluxDB
-INFLUXDB_ORG = "5efe2135bd9e19a3"  # Substitua pela sua organização no InfluxDB
+INFLUXDB_TOKEN = ""  # Substitua pelo seu token do InfluxDB
+INFLUXDB_ORG = ""  # Substitua pela sua organização no InfluxDB
 INFLUXDB_BUCKET = "demotech"  # Substitua pelo nome do seu bucket
 
 # Lista de freezers e seus tipos de frutas
