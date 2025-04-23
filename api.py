@@ -7,9 +7,9 @@ from influxdb_client import InfluxDBClient, QueryApi  # Importar cliente InfluxD
 
 # Configurações do InfluxDB (as mesmas do código freezers.txt)
 INFLUXDB_URL = "http://localhost:8086"
-INFLUXDB_TOKEN = "SyWyLlP_7QoixysgZwwQNUZiGkRyXVt6YSb-m2BkIZfiD53ewmgi2aORS6L_WGk2v7H5FPD8VZZa4oa_QqyFxA=="
-INFLUXDB_ORG = "5efe2135bd9e19a3"
-INFLUXDB_BUCKET = "demotech"
+INFLUXDB_TOKEN = ""
+INFLUXDB_ORG = ""
+INFLUXDB_BUCKET = ""
 LOKI_ENDPOINT = "http://localhost:3100/loki/api/v1/push"
 logger = logging.getLogger(__name__)
 
