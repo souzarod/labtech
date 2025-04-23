@@ -1,0 +1,136 @@
+networks:
+  network-zabbix:
+    driver: bridge
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    networks:
+      - network-zabbix
+    ports:
+      - '3306:3306'
+    volumes:
+      - './zabbix/mysql:/var/lib/mysql'
+    command:
+      - --character-set-server=utf8
+      - --collation-server=utf8_bin
+    environment:
+      - MYSQL_ROOT_PASSWORD=labalemao
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=labalemao
+
+  zabbix-server:
+    container_name: zabbix-server
+    image: zabbix/zabbix-server-mysql:7.0-centos-latest
+
+    networks:
+      - network-zabbix
+    links:
+      - mysql
+    restart: always
+    ports:
+      - '10051:10051'
+    volumes:
+      - './zabbix/alertscripts:/usr/lib/zabbix/alertscripts'
+      - './zabbix/externalscripts:/usr/lib/zabbix/externalscripts'
+    environment:
+      - DB_SERVER_HOST=mysql
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=labalemao
+      - MYSQL_ROOT_PASSWORD=labalemao
+    depends_on:
+      - mysql
+
+  zabbix-frontend:
+    container_name: zabbix-frontend
+    image: zabbix/zabbix-web-apache-mysql:7.0-centos-latest
+
+    networks:
+      - network-zabbix
+    links:
+      - mysql
+    restart: always
+    ports:
+      - '80:8080'
+      - '443:8443'
+    environment:
+      - DB_SERVER_HOST=mysql
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=labalemao
+      - PHP_TZ=America/Sao_Paulo
+      - MYSQL_ROOT_PASSWORD=labalemao
+      - ZBX_SERVER_NAME=zabbix-server
+      - ZBX_SERVER_HOST=zabbix-server
+    depends_on:
+      - mysql
+   
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    networks:
+      - network-zabbix
+    links:
+      - mysql
+      - zabbix-server
+      - loki
+      - zabbix-frontend
+      - influxdb
+    restart: always
+    ports:
+      - '3000:3000'
+    environment: 
+      - GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app
+    depends_on:
+      - mysql
+      - zabbix-server
+  zabbix-agent:
+    container_name: zabbix-agent
+    image: zabbix/zabbix-agent2:7.0-centos-latest
+
+    user: root
+    networks:
+      - network-zabbix
+    links:
+      - zabbix-server
+    restart: always
+    privileged: true
+    volumes:
+      - /var/run:/var/run
+    ports:
+      - '10050:10050'
+    environment:
+      - ZBX_HOSTNAME=Zabbix server
+      - ZBX_SERVER_HOST=zabbix-server
+
+  influxdb:
+    image: influxdb:2.7.11
+    container_name: influxdb2
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2-data:/var/lib/influxdb2
+      - influxdb2-config:/etc/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${LABUSER}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${LABPASSWORD}
+      DOCKER_INFLUXDB_INIT_ORG: labalemao
+      DOCKER_INFLUXDB_INIT_BUCKET: demotech
+    networks:
+      - network-zabbix
+  
+  loki:
+    image: grafana/loki:2.9.14
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - network-zabbix
+      
+volumes:
+  influxdb2-data:
+  influxdb2-config:
